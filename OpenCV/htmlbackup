@@ -1,0 +1,180 @@
+<h2>機能</h2>
+<p>①信号の色検出機能</p>
+<p>カメラで動画を撮影し、一定のフレームごとの画像をフィルタにかけて、赤信号を検出したらラの音がブザーで鳴り、青信号を検出したらドの音がブザーで鳴る。</p>
+<p>②照明機能<br></p>
+<p>照度センサーで周囲の明るさを測定し、基準値を下回る場合、３つのLEDが点灯する。目が不自由な方は自転車や車に気づくことが難しいため、白杖が点灯することによって、周囲の人間に自分の存在を知らせることができ、事故防止につながる。</p>
+<p><br></p>
+<h3>仕組み</h3>
+<p><br></p>
+<h4><sub>①信号の色検出機能</sub></h4>
+<p><span style="font-size:0.9375rem;"><u><strong>大まかな構想</strong></u></span><br></p>
+<h6>
+</h6>
+<ol>
+    <li><span style="font-weight:normal;">webカメラ(スマホ)を起動、リアルタイム映像をPCに送信</span></li>
+    <li><span style="font-weight:normal;">歩行者信号機を検出</span></li>
+    <li><span style="font-weight:normal;">「赤信号」か「青信号」かを判別</span></li>
+    <li><span style="font-weight:normal;">PC側からデータをArduinoに送信、ブザーを鳴らす</span></li>
+</ol>
+
+
+<p></p>
+
+<p><span style="font-size:0.9375rem;"><u><strong>詳細な説明</strong></u></span></p>
+<p><span style="font-size:0.9375rem;"><strong>webカメラ(スマホ)を起動、リアルタイム映像をPCに送信</strong></span></p>
+<p></p>
+<p>　<span style="font-weight:normal;">webカメラとして今回使用するのは、皆さんお持ちの「スマートフォン」!</span></p>
+<p><span style="font-weight:normal;">　必要なことはアプリ「iVcam」をPCとスマホの両方にインストールすることだけです。</span></p>
+<p><span style="font-weight:normal;">　当初は、webカメラとしてArduinoに接続するカメラを購入しようと計画していましたが、スマホのカメラをPCのwebカメラとして使うことが可能でした。</span></p>
+<p><span style="font-weight:normal;">　これにより、スマホのカメラで捉えるリアルタイム映像を、OpenCVを活用しながらPCでフレームレート処理を行います。</span></p>
+<p><span style="font-weight:normal;">　</span></p>
+<p><span style="font-size:0.9375rem;"><strong>歩行者信号機を検出</strong></span></p>
+<p><strong>　</strong>カメラの準備を終えたところで、次の課題は</p>
+<p style="text-align:left;"><span><strong>　　　「どうやって信号機を検出するか？」</strong></span></p>
+<p style="text-align:left;"><span>　です。この難解な課題を解決しないことには、私たちの作品の根幹となるアイデアを実現することはできません。</span></p>
+<p style="text-align:left;"><span><br></span></p>
+<p style="text-align:left;"><span>　しかし、この課題は意外とあっさり解決しました。</span></p>
+<p style="text-align:left;"><span>　解決の手立てとなったのは、<span>ずばり...&nbsp;</span><strong>AI</strong>です！</span></p>
+<p style="text-align:left;"><span>　<strong>yolov5</strong></span></p>
+<blockquote>
+    <p>Ultralytics YOLOv5 🚀 is a cutting-edge, state-of-the-art (SOTA) model that builds upon the success of previous YOLO versions and introduces new features and improvements to further boost performance and flexibility. YOLOv5 is designed to be fast, accurate, and easy to use, making it an excellent choice for a wide range of object detection, instance segmentation and image classification tasks.</p>
+    <cite>https://pytorch.org/hub/ultralytics_yolov5/</cite>
+</blockquote>
+<p><span style="font-size:0.9375rem;"><span>　</span></span></p>
+<p><span style="font-size:0.9375rem;"><span>　yolov5をmodelにして、物体検出を行うことで信号機をうまく検出しようと試みました。</span></span></p>
+<p><span style="font-size:0.9375rem;"><span>　うれしいことに、yolov5のデータ重みにはもともと信号機(class["traffic light"])を検出する機能が備わっています。</span></span></p>
+<p><span style="font-size:0.9375rem;"><span>　実際に信号機を検出してみましょう。</span></span></p>
+<p><span style="font-size:0.9375rem;"><span>　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/sample99origin.png" alt="信号機の写真" width="200" height="267" class="img-fluid atto_image_button_text-bottom">(図1)</span></span></p>
+<p><span style="font-size:0.9375rem;"><strong>&nbsp;　</strong>上の写真をyolov5のデータ重みによって物体検出をかけると、、、</span></p>
+<p><span style="font-size:0.9375rem;">　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/sample99after.png" alt="物体検出後" width="200" height="267" class="atto_image_button_text-bottom">（図２）<br></span></p>
+<p><span style="font-size:0.9375rem;">　しっかり、「traffic light」として信号機が認識されていることが確認できます！</span></p>
+<p>　信号機の検出がうまくいったということで、次なる課題はいよいよ、「赤信号」と「青信号」の判別です。</p>
+<p><span style="font-size:0.9375rem;"><br></span></p>
+<p><span style="font-size:0.9375rem;"><strong>「赤信号」か「青信号」かを判別</strong></span></p>
+<p><span style="font-size:0.9375rem;"><span>　信号機を検出したらまずは、信号機として判定された領域のみをトリミングします。</span></span></p>
+<p><span style="font-size:0.9375rem;"><span>　トリミングの方法としてはOpenCV上で使用できるcrop関数を使います。</span></span></p>
+<p><span style="font-size:0.9375rem;"><span>　crop関数を用いて物体検出により信号機として検知された領域をcrop(トリミング)します。図１の写真をcropしてみます。</span></span></p>
+<p><span style="font-size:0.9375rem;"><span>　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/sample99%28crop%29.jpg" alt="crop画像" width="140" height="305" class="img-fluid atto_image_button_text-bottom">(図３)</span></span></p>
+<p><span style="font-size:0.9375rem;"><span>　うまくトリミングされることが、確認できました。</span></span></p>
+<p><span style="font-size:0.9375rem;"><span>　次に、赤信号か青信号かを判断する段階に進みたいと思います。重要になってくるのはトリミング画像の上側領域(赤側)と下側領域(青側)の差異です。上側領域と下側領域のそれぞれ特有の数値をを比較し、判別するアルゴリズムが必要になってきます。</span></span></p>
+<p><span style="font-size:0.9375rem;"><span>　まずは、上側領域と下側領域とに分割します。イメージとしては下図のとおりです。</span></span></p>
+<p><span style="font-size:0.9375rem;"><span>　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/crop1.jpeg" alt="上側領域と下側領域に分割" width="140" height="267" class="atto_image_button_text-bottom">(図４)</span></span></p>
+<p>　図４を見ると上側領域、下側領域それぞれに信号機の赤、青を判別するのに不必要な成分が存在します。ということでそれぞれの領域の中央部に領域(正方形)を新しく作り、この特定領域内である数値を比較したいと思います。</p>
+<p>　それぞれの領域の中央部領域の抽出イメージは下図のとおりです。</p>
+<p>　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/crop2.jpeg" alt="中央部特定領域の抽出" width="140" height="262" class="img-fluid atto_image_button_text-bottom">(図5<span style="font-size:0.9375rem;">)</span></p>
+<p>　それでは、図５の緑色の正方形領域内のある数値を比較したいと思います。</p>
+<p>　ある数値とは何ぞやということになると思いますが、今回は「赤」か「青」かを判別するというのが目的であるので、色素(色空間)に注目します。</p>
+<p>　あらゆる色というのは、光の三原色「赤」「青」「緑」の3つの成分のバランスによって構成されています。今回は「赤」「青」の成分を比較対象の値とします。</p>
+<p>　青信号は実際は「緑」色に近いため、「青」成分ではなく、「緑」成分に注目すべきだと感じる方もいるかとは思いますが、図５の中心部領域には黄色(人型の部分)のピクセルが多く存在することが分かります。そのため、「青」成分を対象の値として設定します。</p>
+<p>　比較方法としては領域内のピクセルのR(赤)成分とB(青)成分の平均値を求め、その差の絶対値を上側領域、下側領域とで比較します。</p>
+<p>　例えば、赤側(上側領域)が点灯しているときは上側領域の|(R成分)-(B成分)|は下側に比べて大きくなるはずです。</p>
+<p>　この違いを利用して、|(R成分)-(B成分)|が大きい側を点灯しているというように判別することにします。</p>
+<p>　ここまでの仕組みを利用すると、とりあえずは、赤信号と青信号の判別は実現できそうです...</p>
+<p>　</p>
+<p><strong style="font-size:0.9375rem;">PC側からデータをArduinoに送信、ブザーを鳴らす</strong></p>
+<p><strong style="font-size:0.9375rem;">　</strong><span style="font-size:0.9375rem;">さて、赤信号と青信号の判別が理論的には実現できそうなところまできました。最後に残された課題は「信号の色の判別結果をArduinoに送る」ことです。</span></p>
+<p><span style="font-size:0.9375rem;">　赤信号の場合は'r'、青信号の場合には'b'をArduino側に送ろうと試みます。</span></p>
+<p><span style="font-size:0.9375rem;">　これがどうもうまくいきませんでした。</span></p>
+<p><span style="font-size:0.9375rem;">　原因はPC(python)とArduino間のシリアル通信の仕組みにありました。</span></p>
+<blockquote>
+    <p>The first byte of incoming serial data available (or -1 if no data is available). Data type: int.</p>
+    <cite>https://www.arduino.cc/reference/en/language/functions/communication/serial/read/</cite>
+</blockquote>
+
+<p><span style="font-size:0.9375rem;">　</span></p>
+<p><span style="font-size:0.9375rem;">　PythonとArduino間のシリアル通信は基本的にbyte型データで行われます。</span></p>
+<p><span style="font-size:0.9375rem;">　そのため、文字列'r'をPython側からただ送っても、正常作動しませんでした。</span></p>
+<p><span style="font-size:0.9375rem;">　Python側で以下のようにbyte型データにエンコーディングしてArduino側に送る必要があります。</span></p>
+<pre>  <code>
+    # Arduinoに信号を送信
+　　flag = bytes(color, 'utf-8')
+　　ser.write(flag)
+  </code>
+</pre>
+
+<p><span style="font-size:0.9375rem;">　エンコーディングした文字列データを送るとうまく作動しました。</span></p>
+<p><span style="font-size:0.9375rem;">　シリアル通信が正常に行えることを確認したのち、ブザーの鳴動の間隔(delay)を調整するとうまくフレーム処理に対応してブザーが作動します。</span></p>
+<p><span style="font-size:0.9375rem;">　これで構想していた通りのシステムが完成しました。</span></p>
+<p><span style="font-size:0.9375rem;">　いよいよ実験です！</span></p>
+<p><span style="font-size:0.9375rem;"><br></span></p>
+<p><span style="font-size:0.9375rem;"><strong>見落としていた問題</strong></span></p>
+<p><strong>　</strong>システムの骨組みが完成したことにより、「ココロオドル」私たちでしたが、実験に移る前に大きな問題点を２つ抱えていました。</p>
+<p><strong>　Prob.1　「車用信号機も検出してしまう」</strong></p>
+<p><span><span><strong>　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/prob1.jpg" alt="車用信号機も検出してしまう" width="500" height="636" class="atto_image_button_text-bottom"></strong>(図6)</span></span></p>
+<p><strong><span style="font-size:0.9375rem;font-weight:400;">　yolov5内のデータ重みに存在する検出クラス['traffic light']は、車用信号機も検出してしまいます。</span></strong></p>
+<p>　我々が検出したい対象は歩行者信号のみですので、システムがうまく作動しない可能性が大きいです。</p>
+<p><br></p>
+<p><strong>　Prob.2　「複数の信号機を検出してしまう」</strong></p>
+<p>　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/prob2.jpg" alt="複数の信号機の検出" width="400" height="534" class="atto_image_button_text-bottom">(図7)</p>
+<p><strong>　</strong>フレームレート処理の信号の色判別で得たいデータは渡りたい横断歩道の先にある歩行者信号機のデータのみです。</p>
+<p><span>　スマホで捉えた映像に映る信号機のすべてを色判別しては、元も子もありません。</span></p>
+<p><span><br></span></p>
+<p><strong>問題の解決策</strong></p>
+<p><strong>　</strong>では、どうすれば歩行者信号のみを検出し、横断歩道の先にある信号機ただ一つを色判別できるのでしょうか？</p>
+<p><br></p>
+<p>　そうだ！</p>
+<p><br></p>
+<p>　<strong>自分でモデルを作ればいいじゃん！</strong></p>
+<p>　</p>
+<p><br></p>
+<p>　<strong>roboflow</strong></p>
+
+<blockquote>
+    <p>Everything you need to build and deploy computer vision models&nbsp;</p>
+    <p>&nbsp;Integrate into any part of your pipeline
+        With open APIs, SDKs, integrated developer tools, and rich documentation, you can customize, automate, and extend your pipeline to other applications.</p>
+    <cite>https://roboflow.com/</cite>
+</blockquote>
+
+<p><strong>　</strong></p>
+<p><strong>　</strong>roboflowを用いて、街中の歩道から撮れる写真を集めます。</p>
+<p>　大量の写真を歩行者用信号機['pedestrian-traffic-light']のみをアノテーションし、yolov5用のtrainデータに変換することで新たな自作のデータ重みを作成します。</p>
+<p>　trainデータ作成の際に注意したことは、正面を向いている歩行者信号機のみをアノテーションすること、精密にトリミングすることの2つです。</p>
+<p>　さらに、歩行者用信号機(pedestrian-traffic-light)として検出された部分をcropした画像それぞれの面積(大きさ)を計算し、「最も大きなcrop画像を色判別の対象とする」というアルゴリズムを加えることで、横断歩道のその先にある判別したい信号機のみを調べるという仕組みに変更しました。</p>
+<p><br></p>
+<p>さあ、今度こそいよいよ実験です！</p>
+<p><br></p>
+<p><strong>実験</strong></p>
+<p><br></p>
+<p>　それでは、早速外に出て実験をしてみましょう！</p>
+<p>　まずは、赤信号から。</p>
+<p>　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/%E6%98%BC%28red%29.png" alt="昼(red)" width="600" height="400" class="img-fluid atto_image_button_text-bottom">(図8)</p>
+<p>　しっかりと、'r'が返されていることが分かります。</p>
+<p>　青信号の時はどうでしょう。</p>
+<p>　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/%E6%98%BC%28blue%29.png" alt="昼(blue)" width="600" height="400" class="img-fluid atto_image_button_text-bottom">(図9)</p>
+<p>　うん！しっかりと青信号の時は'b'が返されていることが分かりますね！</p>
+<p>　アルゴリズムとしては、歩行者信号機を検出した後、青ではないと判断した時は赤信号として'r'を返す仕組みになっています。</p>
+<p>　そのため、青信号の時にしっかりと、'b'が返るようであれば、システムは正常に機能しているということになります。</p>
+<p><br></p>
+<p>　それでは、夜の時はどうでしょうか？？</p>
+<p>　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/%E5%A4%9C%28%E5%A4%B1%E6%95%97%29.png" alt="夜(失敗)" width="600" height="400" class="img-fluid atto_image_button_text-bottom">(図10)</p>
+<p>　あれれ...　　青信号のはずなのに'r'が返っています。おかしいですね。</p>
+<p>　crop画像を確認してみましょう。</p>
+<p>　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/image0.jpg" alt="crop画像" width="100" height="167" class="img-fluid atto_image_button_text-bottom">(図11)</p>
+<p>　図11を見ると分かる通り、下側中心部領域は青というよりは白色に近い色としてとらえられているというのが確認できます。</p>
+<p>　そこで、信号の色判別のアルゴリズムを見直してみます。</p>
+<p>　この段階では、上側領域、下側領域それぞれの|(R成分)-(B成分)|を比較し、数値の大きい方が光っていると判別しています。</p>
+<p>　しかし、図11を見ると分かる通り、青信号が光っているとき、白色に近い形でフレームを認識していますので、上側領域の大半は「黒」、下側両機の大半が「白」というようにデータを処理するため、|(R成分)-(B成分)|を比較しては上側領域と下側領域の差異を正しく判別できません。</p>
+<p>　そこで、比較する値を「[B, G, R]成分の総和」として比較する方式に変更します。　</p>
+<p>　このアルゴリズムで改めてトライしてみます。</p>
+<p>　<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/%E5%A4%9C%28%E6%88%90%E5%8A%9F%29.png" alt="夜(成功)" width="600" height="400" class="img-fluid atto_image_button_text-bottom">(図12)</p>
+<p>　すごい！今回は正しく'b'が返っていることが確認できます。</p>
+<p>　昼の場合と、夜の場合(night ver)とでアルゴリズムを変えるとうまく、信号を判別することができそうです！</p>
+<p>　</p>
+<p>　</p>
+
+
+
+
+
+
+
+
+<h5>②照明機能</h5>
+
+<p></p>
+
+<p>照度センサーによって返された周囲の明るさによる値が基準値を下回るとき、３つのLEDにつながるピンに電流を流す。<img src="https://moodle.elms.hokudai.ac.jp/draftfile.php/889679/user/draft/198242235/%C3%83_%C3%82%C2%A7_%C3%83_%C3%82%C2%A7%C3%83_%C3%82%C2%A6__%C3%83_%C3%82%C2%A6%C3%83_%C3%82%C2%A9_%C3%83_%C3%82%C2%A8_%C3%83_%C3%82%C2%BD%C3%83_%C3%82%C2%A3_%C3%83_%C3%82%C2%AE%C3%83_%C3%82%C2%A5__%C3%83_%C3%82%C2%A8%C3%83_%C3%82%C2%B7%C3%83_%C3%82%C2%AF.jpg" alt=""><br></p>
+<p>（回路図）</p>
+
+<p><br></p>
